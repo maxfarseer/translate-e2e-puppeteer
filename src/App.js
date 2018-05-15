@@ -7,7 +7,13 @@ import SuccessMessage from './SuccessMessage.js'
 class App extends Component {
   state = {  
     complete: false,  
-    firstName: '',  
+    firstName: '',
+    pokemon: {},
+  }
+
+  async componentDidMount() {  
+    const data = await fetch('https://pokeapi.co/api/v2/pokedex/1/').then(res => res.json())  
+    this.setState({pokemon: data})  
   }
 
   handleSubmit = e => {  
@@ -35,11 +41,14 @@ class App extends Component {
             </ul>
           </nav>
         </header>
+        <h3 data-testid="pokemon">  
+          {this.state.pokemon.name ? 'Received Pokemon data!' : 'Something went wrong'}  
+        </h3>
         { this.state.complete ?   
           <SuccessMessage/>   
           :   
           <Login submit={this.handleSubmit} input={this.handleInput} />  
-        } 
+        }
       </div>
     );
   }

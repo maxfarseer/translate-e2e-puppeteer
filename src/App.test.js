@@ -26,6 +26,16 @@ beforeAll(async () => {
   page = await browser.newPage();
   await page.goto('http://localhost:3000/');
   page.emulate(iPhone);
+
+  await page.setRequestInterception(true);  
+  page.on('request', interceptedRequest => {  
+    if (interceptedRequest.url().includes('pokeapi')) {  
+      interceptedRequest.abort();  
+    } else {  
+      interceptedRequest.continue();  
+    }  
+  });
+
 });
 
 describe('on page load ', () => {
@@ -39,12 +49,21 @@ describe('on page load ', () => {
   );
 
   test('nav loads correctly', async () => {
+    // этот тест сломан, чтобы показать пример скриншота.
     const navbar = await page.$eval('.navbar', el => (el ? true : false));
     const listItems = await page.$$('.nal-li');
 
     expect(navbar).toBe(true);
-    expect(listItems.length).toBe(4);
+    if (listItems.length !== 3) {
+      await page.screenshot({path: 'screenshot.png'});
+      expect(listItems.length).toBe(3);  
+    }
   });
+
+  test('fails to fetch pokemon', async () => {
+    const html = await page.$eval('h3', e => e.innerHTML);
+    expect(html).toBe('Something went wrong')
+  }, 1600000);
 });
 
 describe('login form', () => {  
